@@ -20,33 +20,34 @@
 					<el-checkbox-group v-model="reserveTimes">
 						<!-- 第一行 -->
 						<el-row>
-							<el-col :span="6"><el-checkbox label="7.30-8.30" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="8.30-10.30" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="10.30-12.00" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="12-13" name="type"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="7.30-8.30" name="6zund8ga"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="8.30-10.30" name="ygw8b2td"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="10.30-12.00" name="tr5vgygw"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="12-13" name="nyokqqf9"></el-checkbox></el-col>
 						</el-row>
 						<!-- 第二行 -->
 						<el-row>
-							<el-col :span="6"><el-checkbox label="13-15" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="15-17" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="17-19" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="19-21" name="type"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="13-15" name="1vjc5rkn"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="15-17" name="rrjy50as"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="17-19" name="b2pr09kj"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="19-21" name="ulg7wwgd"></el-checkbox></el-col>
 						</el-row>
 						<!-- 第三行 -->
 						<el-row>
-							<el-col :span="6"><el-checkbox label="21-22" name="type"></el-checkbox></el-col>
-							<el-col :span="6"><el-checkbox label="22-23" name="type"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="21-22" name="ri6mnmbp"></el-checkbox></el-col>
+							<el-col :span="6"><el-checkbox label="22-23" name="4i06d63h"></el-checkbox></el-col>
 						</el-row>
 					</el-checkbox-group>
 				</el-form-item>
-				<el-form-item label="任务启动时间段：">
-					<el-time-picker is-range v-model="taskTime" range-separator="至" start-placeholder="开始时间"
-						end-placeholder="结束时间" placeholder="选择时间范围">
+				<el-form-item label="任务启动时间：">
+					<el-time-picker arrow-control v-model="taskStartTime" :picker-options="{
+					      selectableRange: '00:00:00 - 23:59:59'
+					    }" placeholder="任意时间点">
 					</el-time-picker>
 				</el-form-item>
 				<el-form-item>
 					<el-button type="primary" @click="onSubmit">开始任务</el-button>
-					<el-button>重置参数</el-button>
+					<el-button @click="resetParam">重置参数</el-button>
 				</el-form-item>
 			</el-form>
 		</div>
@@ -54,6 +55,7 @@
 </template>
 
 <script>
+	import axios from 'axios';
 	export default {
 		name: 'App',
 		data() {
@@ -65,23 +67,43 @@
 					service_record: {},
 				},
 				// 预约时段 -- 到时候再转化
-				reserveTimes: [],
-				// 任务时间段
-				taskTime: [new Date(2016, 9, 10, 8, 40), new Date(2016, 9, 10, 9, 40)]
+				reserveTimes: ['15-17', '17-19'],
+				// 任务开始时间节点
+				taskStartTime: new Date().setHours(9, 0, 1, 0)
 			}
 		},
 		methods: {
+			// 重置参数
+			resetParam() {
+				this.formData = {
+					// 服务id
+					service_id: "68bafee6156d84e54d84ae55",
+					// 预约参数
+					service_record: {}
+				};
+				this.reserveTimes = ['15-17', '17-19'];
+				this.taskStartTime = new Date().setHours(9, 0, 1, 0);
+			},
+
+			// 开始任务
 			onSubmit() {
-				console.info('填写请求参数表单数据===>',this.formData)
-				console.info('填写请求参数表单数据===>',this.reserveTimes)
-				console.info('填写请求参数表单数据===>',this.taskTime)
+				// this.$ajax.get('https://fanyi.sogou.com/text').then(res => {
+				// 	console.info('返回的结果===>', res)
+				// })
+				console.info('默认开始时间======>', new Date().setHours(9, 0, 1, 0))
+
+				console.info('预约时间显示===>', this.reserveTimes)
 			}
+
+
+
+
 		}
+
 	}
 </script>
 
 <style>
-
 	.tableBox {
 		/* 黑色实线边框 */
 		border: 2px solid #55aaff;
