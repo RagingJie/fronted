@@ -44,17 +44,40 @@
 						</el-checkbox-group>
 					</el-form-item>
 					<el-form-item label="任务启动时间：">
-						<el-time-picker arrow-control v-model="formData.taskStartTime" :picker-options="{
-					      selectableRange: '00:00:00 - 23:59:59'
+						<el-time-picker v-model="formData.taskStartTime" :picker-options="{
+					      selectableRange: '08:59:00 - 09:00:03'
 					    }" placeholder="任意时间点">
 						</el-time-picker>
 					</el-form-item>
 					<el-form-item>
-						<el-button type="primary" @click="onSubmit">开始任务</el-button>
-						<el-button @click="resetParam">重置参数</el-button>
+						<el-button type="primary" @click="onSubmit" :loading="submitTaskLoading" round>开始任务</el-button>
+						<el-button type="danger" @click="resetParam" round>重置参数</el-button>
+						<el-button type="success" @click="seeResult" :disabled="isSeeResult" round>查看结果</el-button>
 					</el-form-item>
 				</el-form>
 			</el-card>
+
+
+			<el-dialog title="预约结果" :visible.sync="dialogVisible" width="50%" :close-on-click-modal="false"
+				:show-close="false">
+				<el-card shadow="always" style="width: 100%">
+					<el-table :data="reserveResult" border>
+						<el-table-column label="序号" type="index" width="75" align="center"></el-table-column>
+						<el-table-column label="预约日期" prop="reserveDate" align="center"></el-table-column>
+						<el-table-column label="预约时段" prop="timePeriod" align="center"></el-table-column>
+						<el-table-column label="预约结果" prop="reserveResult" align="center">
+							<template slot-scope="scope">
+								<el-tag v-if="scope.row.reserveResult == 1" type="success">预约成功</el-tag>
+								<el-tag v-else type="danger">预约失败</el-tag>
+							</template>
+						</el-table-column>
+					</el-table>
+				</el-card>
+				<span slot="footer" class="dialog-footer">
+					<el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+				</span>
+			</el-dialog>
+
 		</div>
 	</div>
 </template>
@@ -65,9 +88,14 @@
 		name: 'App',
 		data() {
 			return {
+				dialogVisible: false,
+				// 预约结果
+				reserveResult: [],
+				// 提交任务加载
+				submitTaskLoading: false,
+				// 能否查看结果
+				isSeeResult: true,
 				formData: {
-					// 微信用户id
-					wx_session_user_id: 'YxuVWnZ0GzTdGk1r_iFPiw',
 					// 服务id
 					service_id: "68bafee6156d84e54d84ae55",
 					// 预约参数
@@ -96,7 +124,13 @@
 
 			// 开始任务
 			onSubmit() {
+				this.submitTaskLoading = true;
 				this.reserveEvaporation(this.formData);
+			},
+
+			// 查看预约结果
+			seeResult() {
+				this.dialogVisible = true
 			},
 
 			// 预约 -- 蒸镀
@@ -110,9 +144,18 @@
 						}
 					}).then(res => {
 					console.info('预约结果为====>', res.data)
+					if (res.data.code == 200) {
+						this.submitTaskLoading = false;
+						this.reserveResult = res.data.data;
+						this.isSeeResult = false;
+					} else if (res.data.code == 500) {
+						this.$message.error(res.data.message)
+						this.submitTaskLoading = false;
+					} else {
+						this.$message.error('系统错误，请联系开发人员解决！！！')
+					}
 				})
 			}
-
 		}
 
 	}
