@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ public class ReserveService {
     private static final String URL = "https://d2.xksyun.com/api3/personal_services/create_service_record_v2?app=weixin_reserve";
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     // 使用系统默认时区
     ZoneId zoneId = ZoneId.systemDefault();
@@ -46,13 +48,15 @@ public class ReserveService {
         LocalTime taskStartTime = requestVo.getTaskStartTime().toInstant().atZone(zoneId).toLocalTime();
         System.out.println("开始执行预约任务...");
         while (true) {
-            System.out.println("当前时间：" + LocalTime.now());
+            System.out.println("当前时间：" + dateTimeFormat.format(new Date()));
             while (LocalTime.now().isAfter(taskStartTime) && LocalTime.now().isBefore(taskEndTime)) {
                 // 开始执行预约
                 executeTask(requestVo, list);
             }
-            // 跳出循环
-            break;
+            if (LocalTime.now().isAfter(taskEndTime)) {
+                // 跳出循环
+                break;
+            }
         }
         return list;
     }
