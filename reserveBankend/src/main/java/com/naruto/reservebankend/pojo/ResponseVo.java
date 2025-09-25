@@ -11,6 +11,16 @@ public class ResponseVo {
     // 预约结果，0-预约失败，1-预约成功
     private Integer reserveResult;
 
+    // 预约返回信息
+    private String msg;
+
+    public ResponseVo(String reserveDate, String timePeriod, Integer reserveResult, String msg) {
+        this.reserveDate = reserveDate;
+        this.timePeriod = timePeriod;
+        this.reserveResult = reserveResult;
+        this.msg = msg;
+    }
+
     public ResponseVo(String reserveDate, String timePeriod, Integer reserveResult) {
         this.reserveDate = reserveDate;
         this.timePeriod = timePeriod;
@@ -42,5 +52,13 @@ public class ResponseVo {
 
     public void setReserveResult(Integer reserveResult) {
         this.reserveResult = reserveResult;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 }

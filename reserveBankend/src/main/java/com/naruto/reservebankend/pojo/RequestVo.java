@@ -8,8 +8,8 @@ import java.util.List;
 public class RequestVo {
 
     private List<String> reserveTimesList;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date taskStartTime;
+    private Date taskEndTime;
     private String wx_session_user_id;
     private String service_id;
     private String service_record_id;
@@ -18,6 +18,18 @@ public class RequestVo {
     private String code;
 
     public RequestVo() {
+    }
+
+    public RequestVo(List<String> reserveTimesList, Date taskStartTime, Date taskEndTime, String wx_session_user_id, String service_id, String service_record_id, Record2 service_record, List<Object> child_service_records, String code) {
+        this.reserveTimesList = reserveTimesList;
+        this.taskStartTime = taskStartTime;
+        this.taskEndTime = taskEndTime;
+        this.wx_session_user_id = wx_session_user_id;
+        this.service_id = service_id;
+        this.service_record_id = service_record_id;
+        this.service_record = service_record;
+        this.child_service_records = child_service_records;
+        this.code = code;
     }
 
     public RequestVo(List<String> reserveTimesList, Date taskStartTime, String wx_session_user_id, String service_id, String service_record_id, Record2 service_record, List<Object> child_service_records, String code) {
@@ -93,5 +105,13 @@ public class RequestVo {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Date getTaskEndTime() {
+        return taskEndTime;
+    }
+
+    public void setTaskEndTime(Date taskEndTime) {
+        this.taskEndTime = taskEndTime;
     }
 }

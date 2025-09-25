@@ -31,11 +31,9 @@ public class ReserveService {
     // 使用系统默认时区
     ZoneId zoneId = ZoneId.systemDefault();
 
-    // 任务结束时间
-    LocalTime taskEndTime = LocalTime.of(9, 0, 15, 0);
-
     private static final String SUCCESS_CODE = "1200";
-    private static final String FAIL_CODE = "1404";
+    private static final String FAIL_CODE_1404 = "1404";
+    private static final String FAIL_CODE_1433 = "1433";
 
     /**
      * 预约蒸镀
@@ -46,6 +44,8 @@ public class ReserveService {
         List<ResponseVo> list = new ArrayList<>();
         // 任务开始时间
         LocalTime taskStartTime = requestVo.getTaskStartTime().toInstant().atZone(zoneId).toLocalTime();
+        // 任务结束时间
+        LocalTime taskEndTime = requestVo.getTaskEndTime().toInstant().atZone(zoneId).toLocalTime();
         System.out.println("开始执行预约任务...");
         while (true) {
             System.out.println("当前时间：" + dateTimeFormat.format(new Date()));
@@ -58,6 +58,7 @@ public class ReserveService {
                 break;
             }
         }
+        System.out.println("预约任务结束...");
         return list;
     }
 
@@ -90,16 +91,22 @@ public class ReserveService {
                 JSONObject resultJSON = JSONUtil.parseObj(result);
                 if (SUCCESS_CODE.equalsIgnoreCase(resultJSON.getStr("code"))) {
                     // 预约成功
-                    ResponseVo responseVo = new ResponseVo(reserveDate, time, 1);
+                    ResponseVo responseVo = new ResponseVo(reserveDate, time, 1, resultJSON.getStr("msg"));
                     list.add(responseVo);
-                } else if (FAIL_CODE.equalsIgnoreCase(resultJSON.getStr("code"))) {
+                } else if (FAIL_CODE_1404.equalsIgnoreCase(resultJSON.getStr("code"))) {
                     // 预约失败
                     if (StrUtil.isBlank(resultJSON.getStr("wx_session_user_id"))) {
                         throw new RuntimeException("【微信用户ID】不正确，请重新填写！");
+                    } else if (StrUtil.isNotBlank(resultJSON.getStr("wx_session_user_id"))) {
+                        ResponseVo responseVo = new ResponseVo(reserveDate, time, 0, resultJSON.getStr("msg"));
+                        list.add(responseVo);
                     } else {
-                        ResponseVo responseVo = new ResponseVo(reserveDate, time, 0);
+                        ResponseVo responseVo = new ResponseVo(reserveDate, time, 0, resultJSON.getStr("msg"));
                         list.add(responseVo);
                     }
+                } else if (FAIL_CODE_1433.equalsIgnoreCase(resultJSON.getStr("code"))) {
+                    ResponseVo responseVo = new ResponseVo(reserveDate, time, 0, resultJSON.getStr("msg"));
+                    list.add(responseVo);
                 }
             }
         } else {
