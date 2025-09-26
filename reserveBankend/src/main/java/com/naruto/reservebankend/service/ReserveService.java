@@ -46,12 +46,13 @@ public class ReserveService {
         LocalTime taskStartTime = requestVo.getTaskStartTime().toInstant().atZone(zoneId).toLocalTime();
         // 任务结束时间
         LocalTime taskEndTime = requestVo.getTaskEndTime().toInstant().atZone(zoneId).toLocalTime();
-        System.out.println("开始执行预约任务...");
+        System.out.println("开始预约任务....");
         // 请求一次，验证填写参数
         verifyTheCorrectnessOfParameters(requestVo);
         while (true) {
-            System.out.println("当前时间：" + dateTimeFormat.format(new Date()));
+            System.out.println("当前时间：" + dateTimeFormat.format(new Date()) + "， 预约任务待执行....");
             while (LocalTime.now().isAfter(taskStartTime) && LocalTime.now().isBefore(taskEndTime)) {
+                System.out.println("预约任务开始执行....");
                 // 开始执行预约
                 executeTask(requestVo, list);
             }

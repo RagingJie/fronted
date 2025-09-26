@@ -93,7 +93,7 @@
 								<el-tag v-else type="danger">预约失败</el-tag>
 							</template>
 						</el-table-column>
-						<el-table-column label="预约结果返回信息" prop="msg" align="center" width="280"></el-table-column>
+						<el-table-column label="预约反馈信息" prop="msg" align="center" width="280"></el-table-column>
 					</el-table>
 				</el-card>
 				<span slot="footer" class="dialog-footer">
@@ -133,7 +133,7 @@
 					},
 					reserveTimesList: ['15-17', '17-19'],
 					taskStartTime: new Date().setSeconds(1, 0),
-					taskEndTime: new Date().setSeconds(15, 0)
+					taskEndTime: new Date().setSeconds(10, 0)
 				},
 				pickerOptions: {
 					disabledDate(time) {
@@ -150,9 +150,19 @@
 			}
 		},
 		methods: {
+
+			taskStart() {
+				this.$notify({
+					title: "任务开始",
+					message: "任务已开始，待执行....",
+					type: 'success',
+					duration: 0
+				});
+			},
+
 			hilarity() {
 				this.$notify({
-					title: "任务开始提示",
+					title: "任务执行",
 					message: "任务正在执行....",
 					type: 'success',
 					duration: 0
@@ -166,12 +176,12 @@
 				this.isSeeResult = false;
 				this.$notify({
 					title: "任务完成",
-					message: "任务已执行完毕，点击《查看结果》按钮，查看结果！",
+					message: "任务已执行完毕，点击【查看结果】按钮，查看结果！",
 					type: 'success',
 					duration: 0
 				});
 			},
-			
+
 			errorTip(msg) {
 				this.isShowTaskCountdown2 = false;
 				this.isShowTaskCountdown = false;
@@ -185,17 +195,7 @@
 					duration: 0
 				});
 			},
-			
-			endTask() {
-				this.submitTaskLoading = false;
-				this.isSeeResult = false;
-				this.$notify({
-					title: "任务完成",
-					message: "任务已执行完毕，点击《查看结果》按钮，查看结果！",
-					type: 'success',
-					duration: 0
-				});
-			},
+
 			// 重置参数
 			resetParam() {
 				this.isShowTaskCountdown2 = false;
@@ -212,7 +212,7 @@
 					},
 					reserveTimesList: ['15-17', '17-19'],
 					taskStartTime: new Date().setSeconds(1, 0),
-					taskEndTime: new Date().setSeconds(15, 0)
+					taskEndTime: new Date().setSeconds(10, 0)
 				};
 			},
 
@@ -252,13 +252,15 @@
 					this.$message.error('《任务结束时间》必须【大于】《任务开始时间》！');
 					return;
 				}
-				if ((this.formData.taskEndTime - this.formData.taskStartTime) <= 10000) {
-					this.$message.error('《任务间隔时间》必须【大于】10秒！');
+				if ((this.formData.taskEndTime - this.formData.taskStartTime) <= 5000) {
+					this.$message.error('《任务间隔时间》必须【大于】5秒！');
 					return;
 				}
 				this.isShowTaskCountdown = true;
 				this.taskCountdown = Date.now() + (this.formData.taskStartTime - new Date());
 				this.submitTaskLoading = true;
+				this.isSeeResult = true;
+				this.taskStart();
 				this.reserveEvaporation(this.formData);
 			},
 
@@ -286,12 +288,48 @@
 					} else {
 						this.errorTip('系统错误，请联系开发人员解决！！！');
 					}
-				})
+				}).catch(error => {
+					// 网络错误或服务器无响应（如连接超时、DNS失败、断网等）
+					if (!error.response) {
+						this.$message.error('网络错误或无法连接服务器，请检查网络连接或服务器是否启动，检查后再试！');
+						this.errorTip('网络错误或无法连接服务器，请检查网络连接或服务器是否启动，检查后再试！');
+					} else {
+						// 服务器有响应，但状态码不是 2xx（如 404, 502, 503 等）
+						const status = error.response.status;
+						let msg = `请求失败（状态码：${status}）`;
+						switch (status) {
+							case 400:
+								msg = '请求参数错误，请检查输入内容';
+								break;
+							case 401:
+								msg = '未授权，请重新登录';
+								break;
+							case 403:
+								msg = '禁止访问';
+								break;
+							case 404:
+								msg = '请求的接口不存在';
+								break;
+							case 500:
+								msg = '服务器内部错误';
+								break;
+							case 502:
+							case 503:
+							case 504:
+								msg = '服务暂时不可用，请稍后再试';
+								break;
+							default:
+								msg = `请求失败（${status}）`;
+						}
+						this.$message.error(msg);
+						this.errorTip(msg);
+					}
+				});
 			}
 		},
 
 		mounted() {
-			document.title = "【预约表 -- 蒸镀】小助手"; // 修改网页标题
+			document.title = "【预约表 -- 蒸镀】小助手";
 		},
 
 	}
