@@ -65,8 +65,7 @@
 					<el-card shadow="hover" style="width: 100%;margin-top: 20px; flex: 1; min-width: 0; "
 						v-if="isShowTaskCountdown">
 						<div style="width: 100%; display: inline-block; ">
-							<el-statistic @finish="hilarity" :value="taskCountdown" time-indices
-								title="🚩任务开始执行倒计时...">
+							<el-statistic @finish="hilarity" :value="taskCountdown" time-indices title="🚩任务开始执行倒计时...">
 							</el-statistic>
 						</div>
 					</el-card>
@@ -172,11 +171,38 @@
 					duration: 0
 				});
 			},
+			
+			errorTip(msg) {
+				this.isShowTaskCountdown2 = false;
+				this.isShowTaskCountdown = false;
+				this.submitTaskLoading = false;
+				this.dialogVisible = false;
+				this.isSeeResult = true;
+				this.$notify({
+					title: "错误",
+					message: msg,
+					type: 'error',
+					duration: 0
+				});
+			},
+			
+			endTask() {
+				this.submitTaskLoading = false;
+				this.isSeeResult = false;
+				this.$notify({
+					title: "任务完成",
+					message: "任务已执行完毕，点击《查看结果》按钮，查看结果！",
+					type: 'success',
+					duration: 0
+				});
+			},
 			// 重置参数
 			resetParam() {
 				this.isShowTaskCountdown2 = false;
 				this.isShowTaskCountdown = false;
 				this.submitTaskLoading = false;
+				this.dialogVisible = false;
+				this.isSeeResult = true;
 				this.formData = {
 					// 服务id
 					service_id: "68bafee6156d84e54d84ae55",
@@ -255,10 +281,10 @@
 					if (res.data.code == 200) {
 						this.reserveResult = res.data.data;
 					} else if (res.data.code == 500) {
-						this.$message.error(res.data.message)
-						this.submitTaskLoading = false;
+						this.$message.error(res.data.message);
+						this.errorTip(res.data.message);
 					} else {
-						this.$message.error('系统错误，请联系开发人员解决！！！')
+						this.errorTip('系统错误，请联系开发人员解决！！！');
 					}
 				})
 			}
