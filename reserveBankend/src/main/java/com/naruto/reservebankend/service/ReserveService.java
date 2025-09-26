@@ -47,6 +47,8 @@ public class ReserveService {
         // 任务结束时间
         LocalTime taskEndTime = requestVo.getTaskEndTime().toInstant().atZone(zoneId).toLocalTime();
         System.out.println("开始执行预约任务...");
+        // 请求一次，验证填写参数
+        verifyTheCorrectnessOfParameters(requestVo);
         while (true) {
             System.out.println("当前时间：" + dateTimeFormat.format(new Date()));
             while (LocalTime.now().isAfter(taskStartTime) && LocalTime.now().isBefore(taskEndTime)) {
@@ -60,6 +62,38 @@ public class ReserveService {
         }
         System.out.println("预约任务结束...");
         return list;
+    }
+
+    /**
+     * 验证参数正确性
+     *
+     * @return R
+     */
+    private void verifyTheCorrectnessOfParameters(RequestVo requestVo) {
+        String time = "7.30-8.30";
+        // 预约时间段id
+        String id = TimeSliceEnum.getIdByName(time);
+        // 随机数
+        String code = UUID.randomUUID().toString().replaceAll("-", "");
+        // 微信用户id
+        String wxUserId = requestVo.getWx_session_user_id();
+        // 预约人姓名
+        String userName = requestVo.getService_record().getEkcmdfazkbhm();
+        // 预约日期
+        String reserveDate = dateFormat.format(requestVo.getService_record().getWx_reserve_date());
+        // 服务id
+        String serviceId = requestVo.getService_id();
+        // 获取预约对象
+        ReserveRequestVo reserveRequestVo = initRequestVo(serviceId, wxUserId, userName, reserveDate, id, time, code);
+        // 预约
+        String result = reserve(reserveRequestVo);
+        JSONObject resultJSON = JSONUtil.parseObj(result);
+        if (FAIL_CODE_1404.equalsIgnoreCase(resultJSON.getStr("code"))) {
+            // 预约失败
+            if (StrUtil.isBlank(resultJSON.getStr("wx_session_user_id"))) {
+                throw new RuntimeException("【微信用户ID】不正确，请重新填写！");
+            }
+        }
     }
 
     /**
@@ -152,7 +186,7 @@ public class ReserveService {
     private static String reserve(ReserveRequestVo requestVo) {
         try {
             String requestParamsJson = JSONUtil.toJsonStr(requestVo);
-            HttpResponse response = HttpRequest.post(URL).timeout(1000).body(requestParamsJson).execute();
+            HttpResponse response = HttpRequest.post(URL).body(requestParamsJson).execute();
             return response.body();
         } catch (Exception e) {
             e.printStackTrace();
