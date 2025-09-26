@@ -61,12 +61,23 @@
 						<el-button type="success" @click="seeResult" :disabled="isSeeResult" round>查看结果</el-button>
 					</el-form-item>
 				</el-form>
-				<el-card shadow="hover" style="width: 100%;margin-top: 20px; " v-if="isShowTaskCountdown">
-					<div style="width: 100%; display: inline-block; ">
-						<el-statistic @finish="hilarity" :value="taskCountdown" time-indices title="🎉距离任务开始执行倒计时🎉">
-						</el-statistic>
-					</div>
-				</el-card>
+				<div style="display: flex; gap: 20px; width: 100%;">
+					<el-card shadow="hover" style="width: 100%;margin-top: 20px; flex: 1; min-width: 0; "
+						v-if="isShowTaskCountdown">
+						<div style="width: 100%; display: inline-block; ">
+							<el-statistic @finish="hilarity" :value="taskCountdown" time-indices
+								title="🚩任务开始执行倒计时...">
+							</el-statistic>
+						</div>
+					</el-card>
+					<el-card shadow="hover" style="width: 100%;margin-top: 20px; flex: 1; min-width: 0;"
+						v-if="isShowTaskCountdown2">
+						<div style="width: 100%; display: inline-block; ">
+							<el-statistic @finish="endTask" :value="taskCountdown2" time-indices title="🎉任务执行中....">
+							</el-statistic>
+						</div>
+					</el-card>
+				</div>
 			</el-card>
 
 
@@ -101,6 +112,8 @@
 		name: 'App',
 		data() {
 			return {
+				taskCountdown2: 0,
+				isShowTaskCountdown2: false,
 				// 是否展示任务倒计时
 				isShowTaskCountdown: false,
 				// 任务倒计时
@@ -120,8 +133,8 @@
 						ekcmdfazkbhm: '徐康'
 					},
 					reserveTimesList: ['15-17', '17-19'],
-					taskStartTime: new Date().setHours(9, 0, 1, 0),
-					taskEndTime: new Date().setHours(9, 0, 15, 0)
+					taskStartTime: new Date().setSeconds(1, 0),
+					taskEndTime: new Date().setSeconds(15, 0)
 				},
 				pickerOptions: {
 					disabledDate(time) {
@@ -139,17 +152,30 @@
 		},
 		methods: {
 			hilarity() {
+				this.$notify({
+					title: "任务开始提示",
+					message: "任务正在执行....",
+					type: 'success',
+					duration: 0
+				});
+				this.isShowTaskCountdown2 = true
+				this.taskCountdown2 = Date.now() + (this.formData.taskEndTime - new Date())
+			},
+
+			endTask() {
 				this.submitTaskLoading = false;
 				this.isSeeResult = false;
 				this.$notify({
 					title: "任务完成",
-					message: "任务已执行完毕，可点击《查看结果》按钮查看预约结果！",
+					message: "任务已执行完毕，点击《查看结果》按钮，查看结果！",
 					type: 'success',
 					duration: 0
 				});
 			},
 			// 重置参数
 			resetParam() {
+				this.isShowTaskCountdown2 = false;
+				this.isShowTaskCountdown = false;
 				this.submitTaskLoading = false;
 				this.formData = {
 					// 服务id
@@ -159,8 +185,8 @@
 						ekcmdfazkbhm: '徐康'
 					},
 					reserveTimesList: ['15-17', '17-19'],
-					taskStartTime: new Date().setHours(9, 0, 1, 0),
-					taskEndTime: new Date().setHours(9, 0, 15, 0)
+					taskStartTime: new Date().setSeconds(1, 0),
+					taskEndTime: new Date().setSeconds(15, 0)
 				};
 			},
 
@@ -192,8 +218,7 @@
 					this.$message.error('任务结束时间不能为空！ 请填写~');
 					return;
 				}
-				const nowTime = new Date();
-				if (this.formData.taskStartTime < nowTime) {
+				if (this.formData.taskStartTime < new Date()) {
 					this.$message.error('《任务开始时间》必须【大于】当前时间！');
 					return;
 				}
@@ -206,9 +231,9 @@
 					return;
 				}
 				this.isShowTaskCountdown = true;
-				this.taskCountdown = Date.now() + (this.formData.taskStartTime - nowTime);
+				this.taskCountdown = Date.now() + (this.formData.taskStartTime - new Date());
 				this.submitTaskLoading = true;
-				// this.reserveEvaporation(this.formData);
+				this.reserveEvaporation(this.formData);
 			},
 
 			// 查看预约结果
