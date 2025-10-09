@@ -51,7 +51,7 @@
 					</el-form-item>
 					<el-form-item label="任务结束时间：">
 						<el-time-picker v-model="formData.taskEndTime" :picker-options="{
-					      selectableRange: '09:00:10 - 23:59:59'
+					      selectableRange: '00:00:10 - 23:59:59'
 					    }" placeholder="任意时间点">
 						</el-time-picker>
 					</el-form-item>
@@ -252,8 +252,8 @@
 					this.$message.error('《任务结束时间》必须【大于】《任务开始时间》！');
 					return;
 				}
-				if ((this.formData.taskEndTime - this.formData.taskStartTime) <= 5000) {
-					this.$message.error('《任务间隔时间》必须【大于】5秒！');
+				if ((this.formData.taskEndTime - this.formData.taskStartTime) <= 6000) {
+					this.$message.error('《任务间隔时间》必须【大于】6秒！');
 					return;
 				}
 				this.isShowTaskCountdown = true;
@@ -261,12 +261,24 @@
 				this.submitTaskLoading = true;
 				this.isSeeResult = true;
 				this.taskStart();
+				this.formData.service_record.wx_reserve_date = this.formatDate(this.formData.service_record.wx_reserve_date);
 				this.reserveEvaporation(this.formData);
 			},
 
 			// 查看预约结果
 			seeResult() {
 				this.dialogVisible = true
+			},
+
+			// 格式化为 yyyy-MM-dd HH:mm:ss
+			formatDate(date) {
+				const year = date.getFullYear();
+				const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从 0 开始
+				const day = String(date.getDate()).padStart(2, '0');
+				const hours = String(date.getHours()).padStart(2, '0');
+				const minutes = String(date.getMinutes()).padStart(2, '0');
+				const seconds = String(date.getSeconds()).padStart(2, '0');
+				return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 			},
 
 			// 预约 -- 蒸镀
