@@ -204,6 +204,7 @@
 				this.submitTaskLoading = false;
 				this.dialogVisible = false;
 				this.isSeeResult = true;
+				this.reserveDate = ''
 				this.formData = {
 					// 服务id
 					service_id: "68bafee6156d84e54d84ae55",
