@@ -15,7 +15,7 @@
 							clearable></el-input>
 					</el-form-item>
 					<el-form-item label="请选择预约日期：">
-						<el-date-picker type="date" placeholder="选择日期" v-model="formData.service_record.wx_reserve_date"
+						<el-date-picker type="date" placeholder="选择日期" v-model="reserveDate"
 							style="width: 100%;" :picker-options="pickerOptions"></el-date-picker>
 					</el-form-item>
 					<el-form-item label="请选择预约时段：">
@@ -111,6 +111,7 @@
 		name: 'App',
 		data() {
 			return {
+				reserveDate: '',
 				taskCountdown2: 0,
 				isShowTaskCountdown2: false,
 				// 是否展示任务倒计时
@@ -228,7 +229,7 @@
 					this.$message.error('预约人姓名不能为空！ 请填写~');
 					return;
 				}
-				if (serviceRecord.wx_reserve_date == null || serviceRecord.wx_reserve_date == undefined) {
+				if (this.reserveDate == null || this.reserveDate == undefined) {
 					this.$message.error('预约日期不能为空！ 请填写~');
 					return;
 				}
@@ -261,7 +262,7 @@
 				this.submitTaskLoading = true;
 				this.isSeeResult = true;
 				this.taskStart();
-				this.formData.service_record.wx_reserve_date = this.formatDate(this.formData.service_record.wx_reserve_date);
+				this.formData.service_record.wx_reserve_date = this.formatDate(this.reserveDate);
 				this.reserveEvaporation(this.formData);
 			},
 
